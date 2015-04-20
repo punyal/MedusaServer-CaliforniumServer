@@ -47,49 +47,67 @@ public class MedusaAuthenticationThread extends Thread{
                 
         while(running) {
             if(ticket.isValid()) {
-                System.out.println("Valid Ticket");
+                //System.out.println("Valid Ticket");
             } else {
-                System.out.println("Not Valid Ticket");
+                //System.out.println("Not Valid Ticket");
                 coapClient.setURI(SERVER_ADDRESS+"/"+SERVER_AUTHENTICATION_SERVICE_NAME);
                 response = coapClient.get();
                 
                 if (response!=null) {
-                    System.out.println(response.getResponseText());
-                    JSONObject json = (JSONObject)JSONValue.parse(response.getResponseText());
-                    ticket.setAuthenticator(json.get(JSON_AUTHENTICATOR).toString());
-                    System.out.println(ticket.getAuthenticator());
-                    
-                    
-                    json.clear();
-                    json.put(JSON_USER_NAME, SERVER_USER_NAME);
-                    json.put(JSON_USER_PASSWORD, Cryptonizer.encrypt(AUTHENTICATION_SECRET_KEY, ticket.getAuthenticator() , SERVER_USER_PASS));
-                    System.out.println(json.toString());
-                    
-                    response = coapClient.put(json.toString(), 0);
-                    
-                    if(response!=null) {
-                        System.out.println(response.getResponseText());
+                    try {
+                        JSONObject json = (JSONObject)JSONValue.parse(response.getResponseText());
+                        ticket.setAuthenticator(json.get(JSON_AUTHENTICATOR).toString());
+                        //System.out.println(ticket.getAuthenticator());
+
+
                         json.clear();
-                        json = (JSONObject)JSONValue.parse(response.getResponseText());
-                        ticket.setTicket(UnitConversion.hexStringToByteArray(json.get(JSON_TICKET).toString()));
-                        ticket.setExpireTime((Long) json.get(JSON_TIME_TO_EXPIRE));
-                    } else {
-                        System.out.println("No Ticket received.");
+                        json.put(JSON_USER_NAME, SERVER_USER_NAME);
+                        json.put(JSON_USER_PASSWORD, Cryptonizer.encrypt(AUTHENTICATION_SECRET_KEY, ticket.getAuthenticator() , SERVER_USER_PASS));
+                        //System.out.println(json.toString());
+
+                        response = coapClient.put(json.toString(), 0);
+
+                        if(response!=null) {
+                            //System.out.println(response.getResponseText());
+                            json.clear();
+                            System.out.println("["+response.getResponseText()+"]");
+                            try {
+                            json = (JSONObject)JSONValue.parse(response.getResponseText());
+                            ticket.setTicket(UnitConversion.hexStringToByteArray(json.get(JSON_TICKET).toString()));
+                            ticket.setExpireTime((Long) json.get(JSON_TIME_TO_EXPIRE));
+                            System.out.println("Ticket updated!! :)");
+                            } catch(Exception e) {
+                                try {
+                                    sleep(4000);
+                                } catch (InterruptedException ex) {
+                                    Logger.getLogger(MedusaAuthenticationThread.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                                System.out.println("JSON Error "+e);
+                            }
+                        } else {
+                            System.out.println("No Ticket received.");
+                            try {
+                                sleep(4000);
+                            } catch (InterruptedException ex) {
+                                Logger.getLogger(MedusaAuthenticationThread.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }
+                    } catch(Exception e) {
+                        System.out.println("JSON Error "+e);
                     }
-                    
                     
                 } else {
                     System.out.println("No Authentication received.");
+                    try {
+                        sleep(4000);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(MedusaAuthenticationThread.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
                 
             }
             
-            // Sleep 1ms to prevent synchronization errors it's possible to remove with other code :)
-            try {
-                sleep(10000);
-            } catch (InterruptedException ex) {
-                Logger.getLogger(MedusaAuthenticationThread.class.getName()).log(Level.SEVERE, null, ex);
-            }  
+              
         }
         
         LOGGER.log(Level.WARNING, "Thread [{0}] dying", MedusaAuthenticationThread.class.getSimpleName()); 
