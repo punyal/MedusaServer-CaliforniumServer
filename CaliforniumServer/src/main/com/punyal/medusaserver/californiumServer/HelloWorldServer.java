@@ -46,7 +46,7 @@ public class HelloWorldServer extends MedusaCoAPServer {
      * of the server are initialized.
      */
     public HelloWorldServer() throws SocketException {
-        
+        super("projects.punyal.com", "Arrowhead", "ArrowheadCoAPServer", "1234567890");
         // provide an instance of a Hello-World resource
         add(new HelloWorldResource());
     }

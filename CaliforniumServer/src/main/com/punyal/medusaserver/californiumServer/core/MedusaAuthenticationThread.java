@@ -32,9 +32,17 @@ public class MedusaAuthenticationThread extends Thread{
     private boolean running;
     private Ticket ticket;
     private CoapClient coapClient;
+    private String medusaServerAddress = null;
+    private String medusaSecretKey = null;
+    private String medusaUserName = null;
+    private String medusaUserPass = null;
     
-    public MedusaAuthenticationThread() {
+    public MedusaAuthenticationThread(String serverAddress, String secretKey, String userName, String userPass) {
         running = false;
+        medusaServerAddress = serverAddress;
+        medusaSecretKey = secretKey;
+        medusaUserName = userName;
+        medusaUserPass = userPass;
         ticket = new Ticket();
         coapClient = new CoapClient();
     }
@@ -50,7 +58,7 @@ public class MedusaAuthenticationThread extends Thread{
                 //System.out.println("Valid Ticket");
             } else {
                 //System.out.println("Not Valid Ticket");
-                coapClient.setURI(SERVER_ADDRESS+"/"+SERVER_AUTHENTICATION_SERVICE_NAME);
+                coapClient.setURI(medusaServerAddress+"/"+SERVER_AUTHENTICATION_SERVICE_NAME);
                 response = coapClient.get();
                 
                 if (response!=null) {
@@ -61,8 +69,8 @@ public class MedusaAuthenticationThread extends Thread{
 
 
                         json.clear();
-                        json.put(JSON_USER_NAME, SERVER_USER_NAME);
-                        json.put(JSON_USER_PASSWORD, Cryptonizer.encrypt(AUTHENTICATION_SECRET_KEY, ticket.getAuthenticator() , SERVER_USER_PASS));
+                        json.put(JSON_USER_NAME, medusaUserName);
+                        json.put(JSON_USER_PASSWORD, Cryptonizer.encrypt(medusaSecretKey, ticket.getAuthenticator() , medusaUserPass));
                         //System.out.println(json.toString());
 
                         response = coapClient.put(json.toString(), 0);
@@ -75,22 +83,12 @@ public class MedusaAuthenticationThread extends Thread{
                             json = (JSONObject)JSONValue.parse(response.getResponseText());
                             ticket.setTicket(UnitConversion.hexStringToByteArray(json.get(JSON_TICKET).toString()));
                             ticket.setExpireTime((Long) json.get(JSON_TIME_TO_EXPIRE));
-                            System.out.println("Ticket updated!! :)");
+                            System.out.println("Ticket updated!! :) -> ["+json.get(JSON_TICKET).toString()+"] expire time "+UnitConversion.Timestamp2String(ticket.getExpireTime()));
                             } catch(Exception e) {
-                                try {
-                                    sleep(4000);
-                                } catch (InterruptedException ex) {
-                                    Logger.getLogger(MedusaAuthenticationThread.class.getName()).log(Level.SEVERE, null, ex);
-                                }
                                 System.out.println("JSON Error "+e);
                             }
                         } else {
                             System.out.println("No Ticket received.");
-                            try {
-                                sleep(4000);
-                            } catch (InterruptedException ex) {
-                                Logger.getLogger(MedusaAuthenticationThread.class.getName()).log(Level.SEVERE, null, ex);
-                            }
                         }
                     } catch(Exception e) {
                         System.out.println("JSON Error "+e);
@@ -98,13 +96,13 @@ public class MedusaAuthenticationThread extends Thread{
                     
                 } else {
                     System.out.println("No Authentication received.");
-                    try {
-                        sleep(4000);
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(MedusaAuthenticationThread.class.getName()).log(Level.SEVERE, null, ex);
-                    }
                 }
                 
+                try {
+                    sleep(2000);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(MedusaAuthenticationThread.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
             
               

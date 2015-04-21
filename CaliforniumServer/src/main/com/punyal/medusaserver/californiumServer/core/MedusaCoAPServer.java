@@ -20,11 +20,36 @@ import org.eclipse.californium.core.CoapServer;
 
 public class MedusaCoAPServer extends CoapServer {
     MedusaAuthenticationThread mat;
+    private String medusaServerAddress = null;
+    private String medusaSecretKey = null;
+    private String medusaUserName = null;
+    private String medusaUserPass = null;
     
     
-    public MedusaCoAPServer() {
-        mat = new MedusaAuthenticationThread();
+    public MedusaCoAPServer(String serverAddress, String secretKey, String userName, String userPass) {
+        medusaServerAddress = serverAddress;
+        medusaSecretKey = secretKey;
+        medusaUserName = userName;
+        medusaUserPass = userPass;
+        mat = new MedusaAuthenticationThread(medusaServerAddress, medusaSecretKey, medusaUserName, medusaUserPass);
     }
+    /*
+    public void setMedusaServerAddress(String serverAddress) {
+        medusaServerAddress = serverAddress;
+    }
+    
+    public void setMedusaSecretKey(String secretKey) {
+        medusaSecretKey = secretKey;
+    }
+    
+    public void setMedusaUserName(String userName) {
+        medusaUserName = userName;
+    }
+    
+    public void setMedusaUserPass(String userPass) {
+        medusaUserPass = userPass;
+    }
+    */
     
     @Override
     public void start() {

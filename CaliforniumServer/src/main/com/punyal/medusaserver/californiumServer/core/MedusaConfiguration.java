@@ -20,11 +20,7 @@ public class MedusaConfiguration{
     private void MedusaConfiguration () {}
     
     // Medusa Server Configuration
-    public static String SERVER_ADDRESS = "projects.punyal.com";
     public static String SERVER_AUTHENTICATION_SERVICE_NAME = "Authentication";
-    public static String AUTHENTICATION_SECRET_KEY = "Arrowhead";
-    public static String SERVER_USER_NAME = "ArrowheadCoAPServer";
-    public static String SERVER_USER_PASS = "1234567890";
     
     // Message Format
     public static String JSON_USER_NAME = "userName";
