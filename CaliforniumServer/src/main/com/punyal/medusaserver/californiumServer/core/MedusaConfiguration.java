@@ -20,13 +20,25 @@ public class MedusaConfiguration{
     private void MedusaConfiguration () {}
     
     // Medusa Server Configuration
-    public static String SERVER_AUTHENTICATION_SERVICE_NAME = "Authentication";
+    public static final String SERVER_AUTHENTICATION_SERVICE_NAME = "Authentication";
+    
+    // Performance Configuration
+    public static final int MAX_NO_AUTHENTICATION_RESPONSES = 5;
+    public static final long NO_AUTHENTICATION_RESPONSES_DELAY = 240000; // 1000*60*4 = 240000 (4min)
+    public static final int MAX_NO_TICKET_RESPONSES = 5;
+    public static final long NO_TICKET_RESPONSES_DELAY = 240000; // 1000*60*4 = 240000 (4min)
     
     // Message Format
-    public static String JSON_USER_NAME = "userName";
-    public static String JSON_USER_PASSWORD = "userPass";
-    public static String JSON_TIME_TO_EXPIRE = "ExpireTime";
-    public static String JSON_AUTHENTICATOR = "Authenticator";
-    public static String JSON_TICKET = "Ticket";
+    public static final String JSON_USER_NAME = "userName";
+    public static final String JSON_USER_PASSWORD = "userPass";
+    public static final String JSON_TIME_TO_EXPIRE = "ExpireTime";
+    public static final String JSON_AUTHENTICATOR = "Authenticator";
+    public static final String JSON_TICKET = "Ticket";
+    
+    // UI Messages
+    public static final String SMS_NO_AUTHENTICATION_RESPONSE = "No Authenticator received. Trying again in " + NO_AUTHENTICATION_RESPONSES_DELAY/60000 + " minutes";
+    public static final String SMS_NO_TICKET_RESPONSE = "No Ticket received. Trying again in " + NO_TICKET_RESPONSES_DELAY/60000 + " minutes";
+    public static final String SMS_AUTHENTICATED = "System is now Authenticated.";
+    public static final String SMS_NO_AUTHENTICATED = "System is now NOT Authenticated.";
     
 }

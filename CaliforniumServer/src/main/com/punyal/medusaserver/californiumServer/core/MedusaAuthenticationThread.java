@@ -20,6 +20,7 @@ import static com.punyal.medusaserver.californiumServer.core.MedusaConfiguration
 import com.punyal.medusaserver.californiumServer.core.security.Cryptonizer;
 import com.punyal.medusaserver.californiumServer.core.security.Ticket;
 import com.punyal.medusaserver.californiumServer.utils.UnitConversion;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.californium.core.CoapClient;
@@ -30,27 +31,35 @@ import org.json.simple.JSONValue;
 public class MedusaAuthenticationThread extends Thread{
     private static final Logger LOGGER = Logger.getLogger(MedusaAuthenticationThread.class.getCanonicalName());
     private boolean running;
-    private Ticket ticket;
-    private CoapClient coapClient;
-    private String medusaServerAddress = null;
-    private String medusaSecretKey = null;
-    private String medusaUserName = null;
-    private String medusaUserPass = null;
+    private boolean authenticated;
+    private final Ticket ticket;
+    private final CoapClient coapClient;
+    private final String medusaServerAddress;
+    private final String medusaSecretKey;
+    private final String medusaUserName;
+    private final String medusaUserPass;
+    private int noAuthenticationResponseCounter;
+    private int noTicketResponseCounter;
     
     public MedusaAuthenticationThread(String serverAddress, String secretKey, String userName, String userPass) {
         running = false;
+        authenticated = false;
         medusaServerAddress = serverAddress;
         medusaSecretKey = secretKey;
         medusaUserName = userName;
         medusaUserPass = userPass;
         ticket = new Ticket();
         coapClient = new CoapClient();
+        
+        noAuthenticationResponseCounter = 0;
+        noTicketResponseCounter = 0;
     }
     
     @Override
     public void run() {
         running = true;
-        LOGGER.log(Level.INFO, "Thread [{0}] running", MedusaAuthenticationThread.class.getSimpleName());
+        Logger.getLogger("org.eclipse.californium.core.network.CoAPEndpoint").setLevel(Level.OFF);
+        Logger.getLogger("org.eclipse.californium.core.network.EndpointManager").setLevel(Level.OFF);
         CoapResponse response;
                 
         while(running) {
@@ -76,32 +85,60 @@ public class MedusaAuthenticationThread extends Thread{
                         response = coapClient.put(json.toString(), 0);
 
                         if(response!=null) {
-                            //System.out.println(response.getResponseText());
                             json.clear();
-                            System.out.println("["+response.getResponseText()+"]");
                             try {
                             json = (JSONObject)JSONValue.parse(response.getResponseText());
                             ticket.setTicket(UnitConversion.hexStringToByteArray(json.get(JSON_TICKET).toString()));
-                            ticket.setExpireTime((Long) json.get(JSON_TIME_TO_EXPIRE));
-                            System.out.println("Ticket updated!! :) -> ["+json.get(JSON_TICKET).toString()+"] expire time "+UnitConversion.Timestamp2String(ticket.getExpireTime()));
+                            ticket.setExpireTime((Long)json.get(JSON_TIME_TO_EXPIRE) + (new Date()).getTime());
+                            noAuthenticationResponseCounter = 0;
+                            noTicketResponseCounter = 0;
+                            if(authenticated == false) {
+                                LOGGER.log(Level.INFO, SMS_AUTHENTICATED);
+                                authenticated = true;
+                            }
                             } catch(Exception e) {
-                                System.out.println("JSON Error "+e);
+                                noTicketResponseCounter++;
+                                //System.out.println("JSON Error "+e);
                             }
                         } else {
-                            System.out.println("No Ticket received.");
+                            //System.out.println("No Ticket received.");
+                            noTicketResponseCounter++;
                         }
                     } catch(Exception e) {
-                        System.out.println("JSON Error "+e);
+                        noAuthenticationResponseCounter++;
+                        //System.out.println("JSON Error "+e);
                     }
                     
                 } else {
-                    System.out.println("No Authentication received.");
+                    //System.out.println("No Authentication received.");
+                    noAuthenticationResponseCounter++;
+                    
                 }
                 
-                try {
-                    sleep(2000);
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(MedusaAuthenticationThread.class.getName()).log(Level.SEVERE, null, ex);
+                if( (authenticated == true) && ((noAuthenticationResponseCounter != 0)||(noTicketResponseCounter != 0)) ) {
+                    LOGGER.log(Level.INFO, SMS_NO_AUTHENTICATED);
+                    authenticated = false;
+                }
+                
+                if(noAuthenticationResponseCounter > MAX_NO_AUTHENTICATION_RESPONSES) {
+                    try {
+                        LOGGER.log(Level.WARNING, SMS_NO_AUTHENTICATION_RESPONSE);
+                        sleep(NO_AUTHENTICATION_RESPONSES_DELAY);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(MedusaAuthenticationThread.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    noAuthenticationResponseCounter = 0;
+                    noTicketResponseCounter = 0;
+                }
+                if(noTicketResponseCounter > MAX_NO_TICKET_RESPONSES) {
+                    try {
+                        LOGGER.log(Level.WARNING, SMS_NO_TICKET_RESPONSE);
+                        sleep(NO_TICKET_RESPONSES_DELAY);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(MedusaAuthenticationThread.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    noAuthenticationResponseCounter = 0;
+                    noTicketResponseCounter = 0;
                 }
             }
             

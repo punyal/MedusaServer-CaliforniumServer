@@ -16,6 +16,7 @@
 package com.punyal.medusaserver.californiumServer;
 
 import com.punyal.medusaserver.californiumServer.core.MedusaCoAPServer;
+import com.punyal.medusaserver.californiumServer.core.MedusaCoapResource;
 import java.net.SocketException;
 
 import org.eclipse.californium.core.CoapResource;
@@ -54,7 +55,7 @@ public class HelloWorldServer extends MedusaCoAPServer {
     /*
      * Definition of the Hello-World Resource
      */
-    class HelloWorldResource extends CoapResource {
+    class HelloWorldResource extends MedusaCoapResource {
         
         public HelloWorldResource() {
             
@@ -66,9 +67,7 @@ public class HelloWorldServer extends MedusaCoAPServer {
         }
         
         @Override
-        public void handleGET(CoapExchange exchange) {
-            
-            // respond to the request
+        public void medusaHandleGET(CoapExchange exchange) {
             exchange.respond("Hello World!");
         }
     }
