@@ -16,17 +16,42 @@
  ******************************************************************************/
 package com.punyal.medusaserver.californiumServer.core.security;
 
+import java.net.InetAddress;
 import java.util.Date;
 
-public class Ticket {
+public class Client  implements Comparable<Client>{
+    private final InetAddress address;
+    private String userName;
+    private String userPass;
     private byte ticket[];
-    private String authenticator;
     private long expireTime;
             
-    public Ticket() {
-        ticket = null;
-        expireTime = 0;
-        this.authenticator = null;
+    public Client(InetAddress address, String userName, String userPass, byte[] ticket, long expireTime) {
+        this.address = address;
+        this.userName = userName;
+        this.userPass = userPass;
+        this.ticket = ticket;
+        this.expireTime = expireTime;
+    }
+    
+    public InetAddress getAddress() {
+        return address;
+    }
+    
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+    
+    public String getUserName() {
+        return userName;
+    }
+    
+    public void setUserPass(String userPass) {
+        this.userPass = userPass;
+    }
+    
+    public String getUserPass() {
+        return userPass;
     }
     
     public void setTicket(byte ticket[]) {
@@ -37,13 +62,6 @@ public class Ticket {
         return ticket;
     }
     
-    public String getAuthenticator() {
-        return authenticator;
-    }
-    
-    public void setAuthenticator(String authenticator) {
-        this.authenticator = authenticator;
-    }
     
     public void setExpireTime(long expireTime) {
         this.expireTime = expireTime;
@@ -58,4 +76,9 @@ public class Ticket {
         return date.getTime() < expireTime;
     }
     
+    @Override
+    public int compareTo(Client t) {
+        return (int)(expireTime - t.expireTime);
+    }
+
 }

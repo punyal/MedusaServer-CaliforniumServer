@@ -15,15 +15,14 @@
  ******************************************************************************/
 package com.punyal.medusaserver.californiumServer;
 
-import com.punyal.medusaserver.californiumServer.core.MedusaCoAPServer;
+import com.punyal.medusaserver.californiumServer.core.MedusaCoapServer;
 import com.punyal.medusaserver.californiumServer.core.MedusaCoapResource;
 import java.net.SocketException;
 
-import org.eclipse.californium.core.CoapResource;
 import org.eclipse.californium.core.server.resources.CoapExchange;
 
 
-public class HelloWorldServer extends MedusaCoAPServer {
+public class HelloWorldServer extends MedusaCoapServer {
     
     /*
      * Application entry point.
@@ -60,7 +59,7 @@ public class HelloWorldServer extends MedusaCoAPServer {
         public HelloWorldResource() {
             
             // set resource identifier
-            super("helloWorld");
+            super("helloWorld", false, getClientsEngine(), getMedusaServerAddress());
             
             // set display name
             getAttributes().setTitle("Hello-World Resource");
@@ -68,7 +67,7 @@ public class HelloWorldServer extends MedusaCoAPServer {
         
         @Override
         public void medusaHandleGET(CoapExchange exchange) {
-            exchange.respond("Hello World!");
+            respond(exchange,"Hello World!");
         }
     }
 }

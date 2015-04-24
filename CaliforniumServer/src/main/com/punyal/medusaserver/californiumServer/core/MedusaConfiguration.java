@@ -20,7 +20,9 @@ public class MedusaConfiguration{
     private void MedusaConfiguration () {}
     
     // Medusa Server Configuration
-    public static final String SERVER_AUTHENTICATION_SERVICE_NAME = "Authentication";
+    public static final String MEDUSA_SERVER_AUTHENTICATION_SERVICE_NAME = "Authentication";
+    public static final String MEDUSA_SERVER_VALIDATION_SERVICE_NAME = "Validation";
+    public static final int CoAP_TICKET_OPTION = 100;
     
     // Performance Configuration
     public static final int MAX_NO_AUTHENTICATION_RESPONSES = 5;

@@ -16,39 +16,106 @@
  ******************************************************************************/
 package com.punyal.medusaserver.californiumServer.core;
 
+import com.punyal.medusaserver.californiumServer.core.security.ClientsEngine;
+import com.punyal.medusaserver.californiumServer.core.security.Medusa;
 import org.eclipse.californium.core.CoapResource;
-import org.eclipse.californium.core.coap.OptionSet;
+import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.server.resources.CoapExchange;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 
 public class MedusaCoapResource extends CoapResource{
+    private final boolean publicResource;
+    private final ClientsEngine clientsEngine;
+    private final String medusaServerAddress;
     
-    public MedusaCoapResource(String name) {
+    public MedusaCoapResource(String name, boolean publicResource, ClientsEngine clientsEngine, String medusaServerAddress) {
         super(name);
+        this.publicResource = publicResource;
+        this.clientsEngine = clientsEngine;
+        this.medusaServerAddress = medusaServerAddress;
     }
     
-    public MedusaCoapResource(String name, boolean visible) {
+    public MedusaCoapResource(String name, boolean visible, boolean publicResource,  ClientsEngine clientsEngine, String medusaServerAddress) {
         super(name, visible);
+        this.publicResource = publicResource;
+        this.clientsEngine = clientsEngine;
+        this.medusaServerAddress = medusaServerAddress;
     }
     
     @Override
     public void handleGET(CoapExchange exchange) {
-        // Check the security
-        OptionSet optList = exchange.getRequestOptions();
-        System.out.println(optList);
-        if(optList.hasOption(100)){
-            System.out.println("Option 100 here");
-            JSONObject json = (JSONObject)JSONValue.parse(optList.toString());
-            
-            System.out.println(json.get("Unknown (100)").toString());
+        // PUBLIC RESOURCE
+        if(publicResource) {
+            medusaHandleGET(exchange);
+            return;
         }
-        else System.out.println("No option 100 here");
-        medusaHandleGET(exchange);
+        // NOT PUBLIC RESOURCE
+        if(Medusa.checkClient(medusaServerAddress, exchange, clientsEngine)) {
+            medusaHandleGET(exchange);
+            return;
+        }
+        // Empty response to prevent retransmissions and saturation
+        exchange.respond(CoAP.ResponseCode.METHOD_NOT_ALLOWED);
+    }
+    
+    @Override
+    public void handlePOST(CoapExchange exchange) {
+        // PUBLIC RESOURCE
+        if(publicResource) {
+            medusaHandlePOST(exchange);
+            return;
+        }
+        // NOT PUBLIC RESOURCE
+        if(Medusa.checkClient(medusaServerAddress, exchange, clientsEngine)) {
+            medusaHandlePOST(exchange);
+            return;
+        }
+        // Empty response to prevent retransmissions and saturation
+        exchange.respond(CoAP.ResponseCode.METHOD_NOT_ALLOWED);
+    }
+    
+    @Override
+    public void handlePUT(CoapExchange exchange) {
+        // PUBLIC RESOURCE
+        if(publicResource) {
+            medusaHandlePUT(exchange);
+            return;
+        }
+        // NOT PUBLIC RESOURCE
+        if(Medusa.checkClient(medusaServerAddress, exchange, clientsEngine)) {
+            medusaHandlePUT(exchange);
+            return;
+        }
+        // Empty response to prevent retransmissions and saturation
+        exchange.respond(CoAP.ResponseCode.METHOD_NOT_ALLOWED);
+    }
+    
+    @Override
+    public void handleDELETE(CoapExchange exchange) {
+        // PUBLIC RESOURCE
+        if(publicResource) {
+            medusaHandleDELETE(exchange);
+            return;
+        }
+        // NOT PUBLIC RESOURCE
+        if(Medusa.checkClient(medusaServerAddress, exchange, clientsEngine)) {
+            medusaHandleDELETE(exchange);
+            return;
+        }
+        // Empty response to prevent retransmissions and saturation
+        exchange.respond(CoAP.ResponseCode.METHOD_NOT_ALLOWED);
     }
     
     public void medusaHandleGET(CoapExchange exchange) {
-        exchange.respond("NOT medusaHandleGET defined");
+        exchange.respond(CoAP.ResponseCode.METHOD_NOT_ALLOWED);
+    }
+    public void medusaHandlePOST(CoapExchange exchange) {
+        exchange.respond(CoAP.ResponseCode.METHOD_NOT_ALLOWED);
+    }
+    public void medusaHandlePUT(CoapExchange exchange) {
+        exchange.respond(CoAP.ResponseCode.METHOD_NOT_ALLOWED);
+    }
+    public void medusaHandleDELETE(CoapExchange exchange) {
+        exchange.respond(CoAP.ResponseCode.METHOD_NOT_ALLOWED);
     }
     
 }

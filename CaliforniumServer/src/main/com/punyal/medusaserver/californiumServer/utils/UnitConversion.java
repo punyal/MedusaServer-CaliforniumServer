@@ -16,6 +16,7 @@
  ******************************************************************************/
 package com.punyal.medusaserver.californiumServer.utils;
 
+import static com.punyal.medusaserver.californiumServer.core.MedusaConfiguration.CoAP_TICKET_OPTION;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
@@ -64,5 +65,18 @@ public class UnitConversion {
     
     public static String Timestamp2String(long timestamp) {
         return new SimpleDateFormat("MM/dd/yyyy HH:mm:ss.S").format(timestamp);
+    }
+    
+    public static String getCoapTicket(String coap) {
+        if(coap.contains("Unknown ("+CoAP_TICKET_OPTION+")")){
+            String temp = coap.substring(coap.indexOf("Unknown ("+CoAP_TICKET_OPTION+")"));
+            temp = temp.substring(temp.indexOf("0x")+2);
+            temp = temp.split("}")[0];
+            temp = temp.split(" ")[0];
+            temp = temp.split(",")[0];
+            if (temp.length() > 0 )
+                return temp;
+        }
+        return null;
     }
 }

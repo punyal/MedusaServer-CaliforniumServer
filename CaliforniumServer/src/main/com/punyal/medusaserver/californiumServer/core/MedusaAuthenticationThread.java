@@ -18,7 +18,7 @@ package com.punyal.medusaserver.californiumServer.core;
 
 import static com.punyal.medusaserver.californiumServer.core.MedusaConfiguration.*;
 import com.punyal.medusaserver.californiumServer.core.security.Cryptonizer;
-import com.punyal.medusaserver.californiumServer.core.security.Ticket;
+import com.punyal.medusaserver.californiumServer.core.security.MyTicket;
 import com.punyal.medusaserver.californiumServer.utils.UnitConversion;
 import java.util.Date;
 import java.util.logging.Level;
@@ -32,7 +32,7 @@ public class MedusaAuthenticationThread extends Thread{
     private static final Logger LOGGER = Logger.getLogger(MedusaAuthenticationThread.class.getCanonicalName());
     private boolean running;
     private boolean authenticated;
-    private final Ticket ticket;
+    private final MyTicket ticket;
     private final CoapClient coapClient;
     private final String medusaServerAddress;
     private final String medusaSecretKey;
@@ -48,7 +48,7 @@ public class MedusaAuthenticationThread extends Thread{
         medusaSecretKey = secretKey;
         medusaUserName = userName;
         medusaUserPass = userPass;
-        ticket = new Ticket();
+        ticket = new MyTicket();
         coapClient = new CoapClient();
         
         noAuthenticationResponseCounter = 0;
@@ -60,6 +60,8 @@ public class MedusaAuthenticationThread extends Thread{
         running = true;
         Logger.getLogger("org.eclipse.californium.core.network.CoAPEndpoint").setLevel(Level.OFF);
         Logger.getLogger("org.eclipse.californium.core.network.EndpointManager").setLevel(Level.OFF);
+        Logger.getLogger("org.eclipse.californium.core.network.stack.ReliabilityLayer").setLevel(Level.OFF);
+        
         CoapResponse response;
                 
         while(running) {
@@ -67,7 +69,7 @@ public class MedusaAuthenticationThread extends Thread{
                 //System.out.println("Valid Ticket");
             } else {
                 //System.out.println("Not Valid Ticket");
-                coapClient.setURI(medusaServerAddress+"/"+SERVER_AUTHENTICATION_SERVICE_NAME);
+                coapClient.setURI(medusaServerAddress+"/"+MEDUSA_SERVER_AUTHENTICATION_SERVICE_NAME);
                 response = coapClient.get();
                 
                 if (response!=null) {
@@ -150,5 +152,9 @@ public class MedusaAuthenticationThread extends Thread{
     
     public void ShutDown() {
         running = false;
+    }
+    
+    public MyTicket getTicket() {
+        return ticket;
     }
 }
