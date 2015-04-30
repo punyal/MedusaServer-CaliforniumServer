@@ -81,7 +81,7 @@ public class MedusaAuthenticationThread extends Thread{
 
                         json.clear();
                         json.put(JSON_USER_NAME, medusaUserName);
-                        json.put(JSON_USER_PASSWORD, Cryptonizer.encrypt(medusaSecretKey, ticket.getAuthenticator() , medusaUserPass));
+                        json.put(JSON_USER_PASSWORD, Cryptonizer.encryptCoAP(medusaSecretKey, ticket.getAuthenticator() , medusaUserPass));
                         //System.out.println(json.toString());
 
                         response = coapClient.put(json.toString(), 0);
