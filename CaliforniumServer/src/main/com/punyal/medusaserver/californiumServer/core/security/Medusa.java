@@ -27,8 +27,10 @@ public class Medusa {
     
     public static byte[] getTicket (CoapExchange exchange) {
         OptionSet optList = exchange.getRequestOptions();
-        if(optList.hasOption(CoAP_TICKET_OPTION)) {
-            return UnitConversion.hexStringToByteArray(UnitConversion.getCoapTicket(optList.toString()));
+        if (optList.hasOption(CoAP_TICKET_OPTION)) {
+            String ticket = UnitConversion.getCoapTicket(optList.toString());
+            if (ticket != null)
+                return UnitConversion.hexStringToByteArray(ticket);
         }
         return null;
     }
