@@ -34,8 +34,8 @@ public class testCrypto {
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
             byte[] b_secretKey = UnitConversion.stringToByteArray("Arrowhead");
-            byte[] b_authenticator = UnitConversion.hexStringToByteArray("b09a984e1699ed9acafac2090db7e471");
-            byte[] b_password = UnitConversion.stringToByteArray("mulle");
+            byte[] b_authenticator = UnitConversion.hexStringToByteArray("b1f46d85c4b0ced921f4c348cd8ce32d");
+            byte[] b_password = UnitConversion.stringToByteArray("1234");
             
             //System.out.println(UnitConversion.ByteArray2Hex(b_secretKey) + "(" + b_secretKey.length+ ")" );
             //System.out.println(UnitConversion.ByteArray2Hex(b_authenticator) + "(" + b_authenticator.length+ ")" );
@@ -82,8 +82,8 @@ public class testCrypto {
         }
         
         
-        System.out.println(Cryptonizer.encrypt("Arrowhead", "b09a984e1699ed9acafac2090db7e471", "mulle")); 
-        System.out.println(Cryptonizer.encryptCoAP("Arrowhead", "b09a984e1699ed9acafac2090db7e471", "mulle"));
+        //System.out.println(Cryptonizer.encrypt("Arrowhead", "b1f46d85c4b0ced921f4c348cd8ce32d", "mulle")); 
+        System.out.println(Cryptonizer.encryptCoAP("Arrowhead", "b1f46d85c4b0ced921f4c348cd8ce32d", "1234"));
     }
     
     public static String toHex(String arg) {
