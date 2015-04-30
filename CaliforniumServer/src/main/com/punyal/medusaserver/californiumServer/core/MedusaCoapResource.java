@@ -16,6 +16,7 @@
  ******************************************************************************/
 package com.punyal.medusaserver.californiumServer.core;
 
+import com.punyal.medusaserver.californiumServer.core.security.Client;
 import com.punyal.medusaserver.californiumServer.core.security.ClientsEngine;
 import com.punyal.medusaserver.californiumServer.core.security.Medusa;
 import org.eclipse.californium.core.CoapResource;
@@ -45,12 +46,13 @@ public class MedusaCoapResource extends CoapResource{
     public void handleGET(CoapExchange exchange) {
         // PUBLIC RESOURCE
         if(publicResource) {
-            medusaHandleGET(exchange);
+            medusaHandleGET(exchange, null);
             return;
         }
         // NOT PUBLIC RESOURCE
-        if(Medusa.checkClient(medusaServerAddress, exchange, clientsEngine)) {
-            medusaHandleGET(exchange);
+        Client client = Medusa.checkClient(medusaServerAddress, exchange, clientsEngine);
+        if(client != null) {
+            medusaHandleGET(exchange, client);
             return;
         }
         // Empty response to prevent retransmissions and saturation
@@ -61,12 +63,13 @@ public class MedusaCoapResource extends CoapResource{
     public void handlePOST(CoapExchange exchange) {
         // PUBLIC RESOURCE
         if(publicResource) {
-            medusaHandlePOST(exchange);
+            medusaHandlePOST(exchange, null);
             return;
         }
         // NOT PUBLIC RESOURCE
-        if(Medusa.checkClient(medusaServerAddress, exchange, clientsEngine)) {
-            medusaHandlePOST(exchange);
+        Client client = Medusa.checkClient(medusaServerAddress, exchange, clientsEngine);
+        if(client != null) {
+            medusaHandlePOST(exchange, client);
             return;
         }
         // Empty response to prevent retransmissions and saturation
@@ -77,12 +80,13 @@ public class MedusaCoapResource extends CoapResource{
     public void handlePUT(CoapExchange exchange) {
         // PUBLIC RESOURCE
         if(publicResource) {
-            medusaHandlePUT(exchange);
+            medusaHandlePUT(exchange, null);
             return;
         }
         // NOT PUBLIC RESOURCE
-        if(Medusa.checkClient(medusaServerAddress, exchange, clientsEngine)) {
-            medusaHandlePUT(exchange);
+        Client client = Medusa.checkClient(medusaServerAddress, exchange, clientsEngine);
+        if(client != null) {
+            medusaHandlePUT(exchange, client);
             return;
         }
         // Empty response to prevent retransmissions and saturation
@@ -93,28 +97,29 @@ public class MedusaCoapResource extends CoapResource{
     public void handleDELETE(CoapExchange exchange) {
         // PUBLIC RESOURCE
         if(publicResource) {
-            medusaHandleDELETE(exchange);
+            medusaHandleDELETE(exchange, null);
             return;
         }
         // NOT PUBLIC RESOURCE
-        if(Medusa.checkClient(medusaServerAddress, exchange, clientsEngine)) {
-            medusaHandleDELETE(exchange);
+        Client client = Medusa.checkClient(medusaServerAddress, exchange, clientsEngine);
+        if(client != null) {
+            medusaHandleDELETE(exchange, client);
             return;
         }
         // Empty response to prevent retransmissions and saturation
         exchange.respond(CoAP.ResponseCode.METHOD_NOT_ALLOWED);
     }
     
-    public void medusaHandleGET(CoapExchange exchange) {
+    public void medusaHandleGET(CoapExchange exchange, Client client) {
         exchange.respond(CoAP.ResponseCode.METHOD_NOT_ALLOWED);
     }
-    public void medusaHandlePOST(CoapExchange exchange) {
+    public void medusaHandlePOST(CoapExchange exchange, Client client) {
         exchange.respond(CoAP.ResponseCode.METHOD_NOT_ALLOWED);
     }
-    public void medusaHandlePUT(CoapExchange exchange) {
+    public void medusaHandlePUT(CoapExchange exchange, Client client) {
         exchange.respond(CoAP.ResponseCode.METHOD_NOT_ALLOWED);
     }
-    public void medusaHandleDELETE(CoapExchange exchange) {
+    public void medusaHandleDELETE(CoapExchange exchange, Client client) {
         exchange.respond(CoAP.ResponseCode.METHOD_NOT_ALLOWED);
     }
     
