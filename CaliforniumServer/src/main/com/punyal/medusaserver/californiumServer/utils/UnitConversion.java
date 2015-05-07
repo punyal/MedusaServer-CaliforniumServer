@@ -71,6 +71,8 @@ public class UnitConversion {
         if(coap.contains("Unknown ("+CoAP_TICKET_OPTION+")")){
             String temp = coap.substring(coap.indexOf("Unknown ("+CoAP_TICKET_OPTION+")"));
             temp = temp.substring(temp.indexOf("0x")+2);
+            if (temp.length() < 3 )
+                return null;
             temp = temp.split("}")[0];
             temp = temp.split(" ")[0];
             temp = temp.split(",")[0];
