@@ -35,7 +35,10 @@ public class MedusaConfiguration{
     public static final String JSON_USER_PASSWORD = "userPass";
     public static final String JSON_TIME_TO_EXPIRE = "ExpireTime";
     public static final String JSON_AUTHENTICATOR = "Authenticator";
+    public static final String JSON_MY_TICKET = "MyTicket";
     public static final String JSON_TICKET = "Ticket";
+    public static final String JSON_ADDRESS = "Address";
+    public static final String JSON_INFO = "Info";
     
     // UI Messages
     public static final String SMS_NO_AUTHENTICATION_RESPONSE = "No Authenticator received. Trying again in " + NO_AUTHENTICATION_RESPONSES_DELAY/60000 + " minutes";

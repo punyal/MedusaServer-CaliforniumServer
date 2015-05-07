@@ -41,7 +41,7 @@ public class ClientsEngine extends Thread{
             // CLEAN OLD TICKETS ===============================================
             long actualTime = (new Date()).getTime();
             while((!clientsList.isEmpty())  && (clientsList.get(0).getExpireTime() < actualTime)) {
-                System.out.print("Client " + clientsList.get(0).getUserName() + " expired!");
+                //System.out.print("Client " + clientsList.get(0).getUserName() + " expired!");
                 Client tmp = clientsList.remove(0);
             }
             // CLEAN OLD TICKETS (END)==========================================

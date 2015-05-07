@@ -33,7 +33,7 @@ public class Medusa {
         return null;
     }
     
-    public static Client checkClient (String medusaServerAddress, CoapExchange exchange, ClientsEngine clientsEngine) {
+    public static Client checkClient (String medusaServerAddress, CoapExchange exchange, ClientsEngine clientsEngine, MyTicket myTicket) {
         byte[] ticket_b = getTicket(exchange);
         if(ticket_b != null) {
             String ticket = UnitConversion.ByteArray2Hex(ticket_b);
@@ -42,14 +42,14 @@ public class Medusa {
             
             if(client != null) {
                 // TODO: check user parameters
-                System.out.println("User already on the system");
+                //System.out.println("User already on the system");
                 return client;
             }else{
                 // Ask to AAA Server
                 // TODO: improve it!!
-                client = MedusaValidation.check(medusaServerAddress, ticket);
+                client = MedusaValidation.check(medusaServerAddress, UnitConversion.ByteArray2Hex(myTicket.getTicket()), ticket);
                 if(client != null) {
-                    System.out.println("New client " + client.getUserName());
+                    //System.out.println("New client " + client.getUserName());
                     clientsEngine.addClient(client);
                     return client;
                 }

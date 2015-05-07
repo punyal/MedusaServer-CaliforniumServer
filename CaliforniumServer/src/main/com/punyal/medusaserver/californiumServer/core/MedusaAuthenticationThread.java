@@ -34,26 +34,45 @@ public class MedusaAuthenticationThread extends Thread{
     private boolean authenticated;
     private final MyTicket ticket;
     private final CoapClient coapClient;
-    private final String medusaServerAddress;
-    private final String medusaSecretKey;
-    private final String medusaUserName;
-    private final String medusaUserPass;
+    private String medusaServerAddress;
+    private String medusaSecretKey;
+    private String medusaUserName;
+    private String medusaUserPass;
+    private String medusaUserInfo;
     private int noAuthenticationResponseCounter;
     private int noTicketResponseCounter;
     
-    public MedusaAuthenticationThread(String serverAddress, String secretKey, String userName, String userPass) {
+    public MedusaAuthenticationThread(String serverAddress, String secretKey, String userName, String userPass, String userInfo) {
         running = false;
         authenticated = false;
         medusaServerAddress = serverAddress;
         medusaSecretKey = secretKey;
         medusaUserName = userName;
         medusaUserPass = userPass;
+        medusaUserInfo = userInfo;
         ticket = new MyTicket();
         coapClient = new CoapClient();
-        
         noAuthenticationResponseCounter = 0;
         noTicketResponseCounter = 0;
     }
+    
+    public MedusaAuthenticationThread() {
+        running = false;
+        authenticated = false;
+        ticket = new MyTicket();
+        coapClient = new CoapClient();
+        noAuthenticationResponseCounter = 0;
+        noTicketResponseCounter = 0;
+    }
+    
+    public void setConfiguration(String serverAddress, String secretKey, String userName, String userPass, String userInfo) {
+        medusaServerAddress = serverAddress;
+        medusaSecretKey = secretKey;
+        medusaUserName = userName;
+        medusaUserPass = userPass;
+        medusaUserInfo = userInfo;
+    }
+    
     
     @Override
     public void run() {
@@ -82,6 +101,7 @@ public class MedusaAuthenticationThread extends Thread{
                         json.clear();
                         json.put(JSON_USER_NAME, medusaUserName);
                         json.put(JSON_USER_PASSWORD, Cryptonizer.encryptCoAP(medusaSecretKey, ticket.getAuthenticator() , medusaUserPass));
+                        json.put(JSON_INFO, medusaUserInfo);
                         //System.out.println(json.toString());
 
                         response = coapClient.put(json.toString(), 0);
@@ -92,10 +112,12 @@ public class MedusaAuthenticationThread extends Thread{
                             json = (JSONObject)JSONValue.parse(response.getResponseText());
                             ticket.setTicket(UnitConversion.hexStringToByteArray(json.get(JSON_TICKET).toString()));
                             ticket.setExpireTime((Long)json.get(JSON_TIME_TO_EXPIRE) + (new Date()).getTime());
+                            //System.out.println((Long)json.get(JSON_TIME_TO_EXPIRE));
                             noAuthenticationResponseCounter = 0;
                             noTicketResponseCounter = 0;
                             if(authenticated == false) {
-                                LOGGER.log(Level.INFO, SMS_AUTHENTICATED);
+                                //LOGGER.log(Level.INFO, SMS_AUTHENTICATED);
+                                System.err.println(SMS_AUTHENTICATED);
                                 authenticated = true;
                             }
                             } catch(Exception e) {
@@ -118,13 +140,15 @@ public class MedusaAuthenticationThread extends Thread{
                 }
                 
                 if( (authenticated == true) && ((noAuthenticationResponseCounter != 0)||(noTicketResponseCounter != 0)) ) {
-                    LOGGER.log(Level.INFO, SMS_NO_AUTHENTICATED);
+                    //LOGGER.log(Level.INFO, SMS_NO_AUTHENTICATED);
+                    System.err.println(SMS_NO_AUTHENTICATED);
                     authenticated = false;
                 }
                 
                 if(noAuthenticationResponseCounter > MAX_NO_AUTHENTICATION_RESPONSES) {
                     try {
-                        LOGGER.log(Level.WARNING, SMS_NO_AUTHENTICATION_RESPONSE);
+                        //LOGGER.log(Level.WARNING, SMS_NO_AUTHENTICATION_RESPONSE);
+                        System.err.println(SMS_NO_AUTHENTICATION_RESPONSE);
                         sleep(NO_AUTHENTICATION_RESPONSES_DELAY);
                     } catch (InterruptedException ex) {
                         Logger.getLogger(MedusaAuthenticationThread.class.getName()).log(Level.SEVERE, null, ex);
@@ -134,7 +158,8 @@ public class MedusaAuthenticationThread extends Thread{
                 }
                 if(noTicketResponseCounter > MAX_NO_TICKET_RESPONSES) {
                     try {
-                        LOGGER.log(Level.WARNING, SMS_NO_TICKET_RESPONSE);
+                        //LOGGER.log(Level.WARNING, SMS_NO_TICKET_RESPONSE);
+                        System.err.println(SMS_NO_TICKET_RESPONSE);
                         sleep(NO_TICKET_RESPONSES_DELAY);
                     } catch (InterruptedException ex) {
                         Logger.getLogger(MedusaAuthenticationThread.class.getName()).log(Level.SEVERE, null, ex);
@@ -154,7 +179,7 @@ public class MedusaAuthenticationThread extends Thread{
         running = false;
     }
     
-    public MyTicket getTicket() {
+    public synchronized MyTicket getTicket() {
         return ticket;
     }
 }

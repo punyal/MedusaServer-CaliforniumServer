@@ -19,6 +19,7 @@ package com.punyal.medusaserver.californiumServer.core;
 import com.punyal.medusaserver.californiumServer.core.security.Client;
 import com.punyal.medusaserver.californiumServer.core.security.ClientsEngine;
 import com.punyal.medusaserver.californiumServer.core.security.Medusa;
+import com.punyal.medusaserver.californiumServer.core.security.MyTicket;
 import org.eclipse.californium.core.CoapResource;
 import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.server.resources.CoapExchange;
@@ -27,19 +28,22 @@ public class MedusaCoapResource extends CoapResource{
     private final boolean publicResource;
     private final ClientsEngine clientsEngine;
     private final String medusaServerAddress;
+    private MyTicket myTicket;
     
-    public MedusaCoapResource(String name, boolean publicResource, ClientsEngine clientsEngine, String medusaServerAddress) {
+    public MedusaCoapResource(String name, boolean publicResource, ClientsEngine clientsEngine, String medusaServerAddress, MyTicket myTicket) {
         super(name);
         this.publicResource = publicResource;
         this.clientsEngine = clientsEngine;
         this.medusaServerAddress = medusaServerAddress;
+        this.myTicket = myTicket;
     }
     
-    public MedusaCoapResource(String name, boolean visible, boolean publicResource,  ClientsEngine clientsEngine, String medusaServerAddress) {
+    public MedusaCoapResource(String name, boolean visible, boolean publicResource,  ClientsEngine clientsEngine, String medusaServerAddress,  MyTicket myTicket) {
         super(name, visible);
         this.publicResource = publicResource;
         this.clientsEngine = clientsEngine;
         this.medusaServerAddress = medusaServerAddress;
+        this.myTicket = myTicket;
     }
     
     @Override
@@ -50,7 +54,7 @@ public class MedusaCoapResource extends CoapResource{
             return;
         }
         // NOT PUBLIC RESOURCE
-        Client client = Medusa.checkClient(medusaServerAddress, exchange, clientsEngine);
+        Client client = Medusa.checkClient(medusaServerAddress, exchange, clientsEngine, myTicket);
         if(client != null) {
             medusaHandleGET(exchange, client);
             return;
@@ -67,7 +71,7 @@ public class MedusaCoapResource extends CoapResource{
             return;
         }
         // NOT PUBLIC RESOURCE
-        Client client = Medusa.checkClient(medusaServerAddress, exchange, clientsEngine);
+        Client client = Medusa.checkClient(medusaServerAddress, exchange, clientsEngine, myTicket);
         if(client != null) {
             medusaHandlePOST(exchange, client);
             return;
@@ -84,7 +88,7 @@ public class MedusaCoapResource extends CoapResource{
             return;
         }
         // NOT PUBLIC RESOURCE
-        Client client = Medusa.checkClient(medusaServerAddress, exchange, clientsEngine);
+        Client client = Medusa.checkClient(medusaServerAddress, exchange, clientsEngine, myTicket);
         if(client != null) {
             medusaHandlePUT(exchange, client);
             return;
@@ -101,7 +105,7 @@ public class MedusaCoapResource extends CoapResource{
             return;
         }
         // NOT PUBLIC RESOURCE
-        Client client = Medusa.checkClient(medusaServerAddress, exchange, clientsEngine);
+        Client client = Medusa.checkClient(medusaServerAddress, exchange, clientsEngine, myTicket);
         if(client != null) {
             medusaHandleDELETE(exchange, client);
             return;

@@ -18,6 +18,7 @@ package com.punyal.medusaserver.californiumServer.core;
 
 import static com.punyal.medusaserver.californiumServer.core.MedusaConfiguration.CoAP_TICKET_OPTION;
 import com.punyal.medusaserver.californiumServer.core.security.ClientsEngine;
+import com.punyal.medusaserver.californiumServer.core.security.MyTicket;
 import org.eclipse.californium.core.CoapServer;
 import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.coap.MediaTypeRegistry;
@@ -26,20 +27,23 @@ import org.eclipse.californium.core.coap.Response;
 import org.eclipse.californium.core.server.resources.CoapExchange;
 
 public class MedusaCoapServer extends CoapServer {
-    private MedusaAuthenticationThread mat;
+    private MedusaAuthenticationThread mat ;
     private String medusaServerAddress = null;
     private String medusaSecretKey = null;
     private String medusaUserName = null;
     private String medusaUserPass = null;
+    private String medusaUserInfo = null;
     private ClientsEngine clientsEngine = new ClientsEngine();
     
     
-    public MedusaCoapServer(String serverAddress, String secretKey, String userName, String userPass) {
+    public MedusaCoapServer(MedusaAuthenticationThread mat, String serverAddress, String secretKey, String userName, String userPass, String userInfo) {
         medusaServerAddress = serverAddress;
         medusaSecretKey = secretKey;
         medusaUserName = userName;
         medusaUserPass = userPass;
-        mat = new MedusaAuthenticationThread(medusaServerAddress, medusaSecretKey, medusaUserName, medusaUserPass);
+        medusaUserInfo = userInfo;
+        this.mat = mat;
+        this.mat.setConfiguration(medusaServerAddress, medusaSecretKey, medusaUserName, medusaUserPass, medusaUserInfo);
         clientsEngine.start();
     }
     /*
@@ -59,6 +63,10 @@ public class MedusaCoapServer extends CoapServer {
         medusaUserPass = userPass;
     }
     */
+    
+    public synchronized MyTicket getMyTicket() {
+        return mat.getTicket();
+    }
     
     @Override
     public void start() {

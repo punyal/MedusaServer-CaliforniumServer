@@ -19,6 +19,8 @@ package com.punyal.medusaserver.californiumServer.core;
 import static com.punyal.medusaserver.californiumServer.core.MedusaConfiguration.*;
 import com.punyal.medusaserver.californiumServer.core.security.Client;
 import com.punyal.medusaserver.californiumServer.utils.UnitConversion;
+import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,7 +34,7 @@ public class MedusaValidation{
     private MedusaValidation() {
     }
     
-    public static Client check(String medusaServerAddress, String ticket) {
+    public static Client check(String medusaServerAddress, String myTicket, String ticket) {
         CoapClient coapClient = new CoapClient();
         Logger.getLogger("org.eclipse.californium.core.network.CoAPEndpoint").setLevel(Level.OFF);
         Logger.getLogger("org.eclipse.californium.core.network.EndpointManager").setLevel(Level.OFF);
@@ -42,8 +44,9 @@ public class MedusaValidation{
         
         coapClient.setURI(medusaServerAddress+"/"+MEDUSA_SERVER_VALIDATION_SERVICE_NAME);
         JSONObject json = new JSONObject();
+        json.put(JSON_MY_TICKET, myTicket);
         json.put(JSON_TICKET, ticket);
-        response = coapClient.put(ticket,0);
+        response = coapClient.put(json.toString(),0);
         
         if(response != null) {
             //System.out.println(response.getResponseText());
@@ -53,7 +56,13 @@ public class MedusaValidation{
                 json = (JSONObject)JSONValue.parse(response.getResponseText());
                 long expireTime = (Long)json.get(JSON_TIME_TO_EXPIRE) + (new Date()).getTime();
                 String userName = json.get(JSON_USER_NAME).toString();
-                Client client = new Client(null, userName, null, UnitConversion.hexStringToByteArray(ticket), expireTime);
+                String[] temp = json.get(JSON_ADDRESS).toString().split("/");
+                String address;
+                if (temp[1] != null)
+                    address = temp[1];
+                else
+                    address = "0.0.0.0";
+                Client client = new Client(InetAddress.getByName(address), userName, null, UnitConversion.hexStringToByteArray(ticket), expireTime);
                 return client;
             } catch(Exception e) {
             }
