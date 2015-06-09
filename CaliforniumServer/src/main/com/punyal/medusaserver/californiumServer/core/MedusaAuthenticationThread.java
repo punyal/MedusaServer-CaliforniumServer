@@ -88,56 +88,64 @@ public class MedusaAuthenticationThread extends Thread{
                 //System.out.println("Valid Ticket");
             } else {
                 //System.out.println("Not Valid Ticket");
-                coapClient.setURI(medusaServerAddress+"/"+MEDUSA_SERVER_AUTHENTICATION_SERVICE_NAME);
-                response = coapClient.get();
                 
-                if (response!=null) {
-                    try {
-                        JSONObject json = (JSONObject)JSONValue.parse(response.getResponseText());
-                        ticket.setAuthenticator(json.get(JSON_AUTHENTICATOR).toString());
-                        //System.out.println(ticket.getAuthenticator());
+                try {
+                    coapClient.setURI(medusaServerAddress+"/"+MEDUSA_SERVER_AUTHENTICATION_SERVICE_NAME);
+                    response = coapClient.get();
+
+                    if (response!=null) {
+                        try {
+                            JSONObject json = (JSONObject)JSONValue.parse(response.getResponseText());
+                            ticket.setAuthenticator(json.get(JSON_AUTHENTICATOR).toString());
+                            //System.out.println(ticket.getAuthenticator());
 
 
-                        json.clear();
-                        json.put(JSON_USER_NAME, medusaUserName);
-                        json.put(JSON_USER_PASSWORD, Cryptonizer.encryptCoAP(medusaSecretKey, ticket.getAuthenticator() , medusaUserPass));
-                        json.put(JSON_INFO, medusaUserInfo);
-                        //System.out.println(json.toString());
-
-                        response = coapClient.put(json.toString(), 0);
-
-                        if(response!=null) {
                             json.clear();
-                            try {
-                            json = (JSONObject)JSONValue.parse(response.getResponseText());
-                            ticket.setTicket(UnitConversion.hexStringToByteArray(json.get(JSON_TICKET).toString()));
-                            ticket.setExpireTime((Long)json.get(JSON_TIME_TO_EXPIRE) + (new Date()).getTime());
-                            //System.out.println((Long)json.get(JSON_TIME_TO_EXPIRE));
-                            noAuthenticationResponseCounter = 0;
-                            noTicketResponseCounter = 0;
-                            if(authenticated == false) {
-                                //LOGGER.log(Level.INFO, SMS_AUTHENTICATED);
-                                System.err.println(SMS_AUTHENTICATED);
-                                authenticated = true;
-                            }
-                            } catch(Exception e) {
+                            json.put(JSON_USER_NAME, medusaUserName);
+                            json.put(JSON_USER_PASSWORD, Cryptonizer.encryptCoAP(medusaSecretKey, ticket.getAuthenticator() , medusaUserPass));
+                            json.put(JSON_INFO, medusaUserInfo);
+                            //System.out.println(json.toString());
+
+                            response = coapClient.put(json.toString(), 0);
+
+                            if(response!=null) {
+                                json.clear();
+                                try {
+                                json = (JSONObject)JSONValue.parse(response.getResponseText());
+                                ticket.setTicket(UnitConversion.hexStringToByteArray(json.get(JSON_TICKET).toString()));
+                                ticket.setExpireTime((Long)json.get(JSON_TIME_TO_EXPIRE) + (new Date()).getTime());
+                                //System.out.println((Long)json.get(JSON_TIME_TO_EXPIRE));
+                                noAuthenticationResponseCounter = 0;
+                                noTicketResponseCounter = 0;
+                                if(authenticated == false) {
+                                    //LOGGER.log(Level.INFO, SMS_AUTHENTICATED);
+                                    System.err.println(SMS_AUTHENTICATED);
+                                    authenticated = true;
+                                }
+                                } catch(Exception e) {
+                                    noTicketResponseCounter++;
+                                    //System.out.println("JSON Error "+e);
+                                }
+                            } else {
+                                //System.out.println("No Ticket received.");
                                 noTicketResponseCounter++;
-                                //System.out.println("JSON Error "+e);
                             }
-                        } else {
-                            //System.out.println("No Ticket received.");
-                            noTicketResponseCounter++;
+                        } catch(Exception e) {
+                            noAuthenticationResponseCounter++;
+                            //System.out.println("JSON Error "+e);
                         }
-                    } catch(Exception e) {
+
+                    } else {
+                        //System.out.println("No Authentication received.");
                         noAuthenticationResponseCounter++;
-                        //System.out.println("JSON Error "+e);
+
                     }
-                    
-                } else {
-                    //System.out.println("No Authentication received.");
+                } catch (IllegalArgumentException ex) {
                     noAuthenticationResponseCounter++;
-                    
                 }
+                
+                
+                
                 
                 if( (authenticated == true) && ((noAuthenticationResponseCounter != 0)||(noTicketResponseCounter != 0)) ) {
                     //LOGGER.log(Level.INFO, SMS_NO_AUTHENTICATED);

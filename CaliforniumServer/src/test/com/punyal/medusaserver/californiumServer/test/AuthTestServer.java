@@ -51,7 +51,7 @@ public class AuthTestServer extends MedusaCoapServer {
      * of the server are initialized.
      */
     public AuthTestServer(MedusaAuthenticationThread mat) throws SocketException {
-        super(mat, "130.240.235.18", "Arrowhead", "Coap_testServer", "test");
+        super(mat, "130.240.235.18", "Arrowhead", "Coap_testServer", "test", null);
         
         // provide an instance of a Hello-World resource
         add(new InfoResource(mat));
